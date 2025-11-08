@@ -6,6 +6,7 @@
 
 // Parsed GPS fields (remain here)
 char latitude[12] = "0000000000";
+char longitude[12] = "0000000000";
 char fix_status = '0';
 
 volatile uint8_t ble_ready = 0; //testing only
@@ -18,7 +19,7 @@ int main(void)
     Initialize_Clock();
     Initialize_GPS_UART();
     Initialize_Bluetooth_UART();
-    //Configure_MTK3339();
+    Configure_MTK3339();
 
     __enable_interrupt();
 
@@ -35,21 +36,24 @@ int main(void)
         {
             new_sentence = 0;
 
-            // Check if it's a GGA sentence
-            if(strstr(gps_buffer, "GGA"))
+            // Check if it's an RMC sentence
+            if(strstr(gps_buffer, "RMC"))
             {
-                parse_GPGGA(gps_buffer);
+                parse_GPRMC(gps_buffer);
 
                 // Send GPS data to Bluetooth
                 Bluetooth_sendString("GPS: ");
                 Bluetooth_sendString(gps_buffer);
                 Bluetooth_sendString("\r\n");
 
-                // Send parsed latitude and fix status
-                if(fix_status != '0')
+                // Send parsed coordinates and fix status
+                // RMC uses 'A' for active/valid, 'V' for void/invalid
+                if(fix_status == 'A')
                 {
                     Bluetooth_sendString("LAT: ");
                     Bluetooth_sendString(latitude);
+                    Bluetooth_sendString(" LON: ");
+                    Bluetooth_sendString(longitude);
                     Bluetooth_sendString(" FIX: ");
                     Bluetooth_sendChar(fix_status);
                     Bluetooth_sendString("\r\n");

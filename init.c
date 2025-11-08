@@ -66,16 +66,12 @@ void GPS_sendCommand(const char *cmd)
 
 void GPS_queryConfig(void)
 {
-    // Query update rate (should respond $PMTK220,250*xx)
-    GPS_sendCommand("$PMTK220?\r\n");
+    // Query fix interval (should respond $PMTK500,...)
+    GPS_sendCommand("$PMTK400*36\r\n");
     __delay_cycles(8000000);
 
     // Query NMEA output settings (should respond $PMTK514,...)
-    GPS_sendCommand("$PMTK414\r\n");
-    __delay_cycles(8000000);
-
-    // Query baud rate (should respond $PMTK251,115200*xx)
-    GPS_sendCommand("$PMTK251?\r\n");
+    GPS_sendCommand("$PMTK414*33\r\n");
     __delay_cycles(8000000);
 }
 
